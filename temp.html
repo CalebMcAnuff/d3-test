@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <svg width="1920" height="1080"></svg>
+    <script>
+        var data = [{value: 10}, {value: 15}, {value: 20}];
+        var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height"),
+            barPadding = 5;
+
+        var xScale = d3.scaleLinear().domain([0, data.length]).range([0, width]);
+        var yScale = d3.scaleLinear().domain([0, d3.max(data, function(d) { return d.value; })]).range([height, 0]);
+
+        function renderBars(data) {
+            var bars = svg.selectAll(".bar").data(data);
+
+            bars.enter()
+                .append("rect")
+                .attr("class", "bar")
+                .merge(bars)
+                .attr("x", function(d, i) { return xScale(i); })
+                .attr("y", function(d) { return yScale(d.value); })
+                .attr("width", width / data.length - barPadding)
+                .attr("height", function(d) { return height - yScale(d.value); });
+
+            bars.exit().remove();
+
+            xScale.domain([0, data.length]);
+        }
+
+        renderBars(data);
+
+        svg.on("click", function(event) {
+            var coords = d3.pointer(event);
+            var newValue = yScale.invert(coords[1]);
+            data.push({value: newValue});
+            renderBars(data);
+        });
+    </script>
+</body>
+</html>
+
